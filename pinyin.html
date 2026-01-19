@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>拼音大冒险 - 多主题版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+
+        :root {
+            --primary-bg: linear-gradient(180deg, #fdfcf0 0%, #e0f2fe 100%);
+            --accent-color: #22c55e;
+            --card-border: #4ade80;
+        }
+
+        /* 萌宠乐园主题 */
+        .theme-forest {
+            --primary-bg: linear-gradient(180deg, #fdfcf0 0%, #e0f2fe 100%);
+            --accent-color: #22c55e;
+            --card-border: #4ade80;
+            --header-bg: rgba(255, 255, 255, 0.6);
+        }
+
+        /* 星际探险主题 */
+        .theme-space {
+            --primary-bg: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+            --accent-color: #818cf8;
+            --card-border: #6366f1;
+            --header-bg: rgba(30, 27, 75, 0.8);
+        }
+
+        /* 糖果世界主题 */
+        .theme-candy {
+            --primary-bg: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
+            --accent-color: #fb7185;
+            --card-border: #fda4af;
+            --header-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        body {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            background: var(--primary-bg);
+            background-attachment: fixed;
+            transition: all 0.5s ease;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .dynamic-header {
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+        }
+
+        .pet-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .theme-forest .pet-card { background: rgba(255, 255, 255, 0.7); }
+        .theme-candy .pet-card { background: rgba(255, 255, 255, 0.6); }
+
+        .pinyin-btn {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .pinyin-btn:active {
+            transform: scale(0.9);
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* 针对太空主题的特殊文本适配 */
+        .theme-space .text-gray-800 { color: #f8fafc; }
+        .theme-space .text-gray-700 { color: #e2e8f0; }
+        .theme-space .text-gray-500 { color: #94a3b8; }
+        .theme-space #lesson-box { background-color: rgba(30, 41, 59, 0.8); }
+    </style>
+</head>
+<body class="theme-forest min-h-screen pb-20" id="main-body">
+
+    <!-- 顶部状态栏 -->
+    <header class="p-4 flex justify-between items-center sticky top-0 z-50 dynamic-header border-b">
+        <div class="flex items-center gap-2">
+            <span id="header-logo" class="text-3xl">🦕</span>
+            <h1 id="header-title" class="text-xl font-bold text-green-600">拼音萌宠乐园</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <!-- 主题切换器 -->
+            <select onchange="changeTheme(this.value)" class="bg-white/50 border-none rounded-full px-2 py-1 text-xs focus:outline-none">
+                <option value="forest">森林乐园</option>
+                <option value="space">星际探险</option>
+                <option value="candy">糖果世界</option>
+            </select>
+            <div class="bg-yellow-400 text-white px-2 py-1 rounded-full text-xs flex items-center shadow-sm">
+                🍎 <span id="energy-val" class="ml-1 font-bold">0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 mt-6">
+        <!-- 宠物进化区 -->
+        <section class="pet-card rounded-[2.5rem] p-6 mb-8 text-center relative overflow-hidden">
+            <div class="relative z-10">
+                <div id="pet-avatar" class="text-9xl mb-4 floating">🥚</div>
+                <h2 id="pet-title" class="text-2xl text-gray-700 mb-4">拼音能量蛋</h2>
+                <div class="progress-bar max-w-xs mx-auto mb-2 shadow-inner">
+                    <div id="evo-fill" class="h-full bg-gradient-to-r from-yellow-400 to-orange-500 transition-all duration-500" style="width: 5%"></div>
+                </div>
+                <p id="evo-tip" class="text-xs text-gray-400">再收集 <span id="need-val">10</span> 个能量，蛋就要裂开啦！</p>
+            </div>
+            <!-- 主题背景装饰 -->
+            <div id="deco-1" class="absolute -bottom-4 -left-4 text-6xl opacity-10">🌿</div>
+            <div id="deco-2" class="absolute top-4 -right-4 text-6xl opacity-10 rotate-12">☀️</div>
+        </section>
+
+        <!-- 闯关地图 -->
+        <nav class="flex gap-4 overflow-x-auto no-scrollbar pb-6 px-2" id="map-rail"></nav>
+
+        <!-- 教学内容区 -->
+        <section id="lesson-box" class="bg-white rounded-[3rem] p-8 shadow-xl border-t-8 border-green-400 transition-colors duration-500">
+            <div class="text-center mb-8">
+                <h3 id="lesson-name" class="text-3xl font-bold text-gray-800">加载中...</h3>
+                <p class="text-gray-500 mt-1" id="lesson-desc">跟我大声读，拒绝洋腔洋调！</p>
+            </div>
+
+            <div id="pinyin-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10"></div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="completeDay()" class="bg-green-500 hover:bg-green-600 text-white px-10 py-4 rounded-full text-xl shadow-lg transition transform active:scale-95">
+                    🎉 我学会啦！
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-black/70 text-white px-8 py-3 rounded-full opacity-0 transition-opacity pointer-events-none z-[100]">
+        <span id="toast-text"></span>
+    </div>
+
+    <script>
+        const themeConfigs = {
+            forest: {
+                logo: "🦕",
+                title: "拼音萌宠乐园",
+                accent: "text-green-600",
+                border: "border-green-400",
+                deco: ["🌿", "☀️"],
+                petStages: ['🥚', '🐣', '🐥', '🦖']
+            },
+            space: {
+                logo: "🚀",
+                title: "拼音星际探险",
+                accent: "text-indigo-400",
+                border: "border-indigo-500",
+                deco: ["🪐", "✨"],
+                petStages: ['☄️', '🛸', '🤖', '👽']
+            },
+            candy: {
+                logo: "🍭",
+                title: "拼音糖果世界",
+                accent: "text-pink-500",
+                border: "border-pink-300",
+                deco: ["🧁", "🌈"],
+                petStages: ['🍬', '🍩', '🍦', '🦄']
+            }
+        };
+
+        const pinyinAudioMap = {
+            'a': '啊', 'o': '喔', 'e': '鹅',
+            'i': '衣', 'u': '屋', 'ü': '淤',
+            'b': '播', 'p': '泼', 'm': '摸', 'f': '佛',
+            'd': '得', 't': '特', 'n': '呢', 'l': '乐'
+        };
+
+        const lessons = {
+            1: { title: "单韵母 a o e", items: [
+                { c: 'a', m: '张大嘴巴 啊啊啊', bg: 'bg-red-50', text: 'text-red-500' },
+                { c: 'o', m: '圆圆嘴巴 喔喔喔', bg: 'bg-blue-50', text: 'text-blue-500' },
+                { c: 'e', m: '扁扁嘴巴 鹅鹅鹅', bg: 'bg-green-50', text: 'text-green-500' }
+            ]},
+            2: { title: "单韵母 i u ü", items: [
+                { c: 'i', m: '牙齿对齐 衣衣衣', bg: 'bg-purple-50', text: 'text-purple-500' },
+                { c: 'u', m: '嘴巴突出 屋屋屋', bg: 'bg-yellow-50', text: 'text-yellow-500' },
+                { c: 'ü', m: '吹起笛子 淤淤淤', bg: 'bg-cyan-50', text: 'text-cyan-500' }
+            ]},
+            3: { title: "声母 b p m f", items: [
+                { c: 'b', m: '广播广播 播播播', bg: 'bg-pink-50', text: 'text-pink-500' },
+                { c: 'p', m: '泼水泼水 泼泼泼', bg: 'bg-indigo-50', text: 'text-indigo-500' },
+                { c: 'm', m: '两个门洞 摸摸摸', bg: 'bg-orange-50', text: 'text-orange-500' }
+            ]}
+        };
+
+        let appState = { day: 1, energy: 0, stage: 0, theme: 'forest' };
+
+        function changeTheme(themeKey) {
+            appState.theme = themeKey;
+            const body = document.getElementById('main-body');
+            if (!body) return;
+            
+            body.className = `theme-${themeKey} min-h-screen pb-20`;
+            
+            const config = themeConfigs[themeKey];
+            document.getElementById('header-logo').innerText = config.logo;
+            document.getElementById('header-title').innerText = config.title;
+            document.getElementById('header-title').className = `text-xl font-bold ${config.accent}`;
+            document.getElementById('deco-1').innerText = config.deco[0];
+            document.getElementById('deco-2').innerText = config.deco[1];
+            
+            const lessonBox = document.getElementById('lesson-box');
+            if (lessonBox) {
+                lessonBox.style.borderTopColor = getComputedStyle(body).getPropertyValue('--card-border');
+            }
+            
+            // 更新宠物外观
+            document.getElementById('pet-avatar').innerText = config.petStages[appState.stage];
+            
+            showToast(`已切换到${config.title}！`);
+            loadLesson(appState.day);
+        }
+
+        function initMap() {
+            const rail = document.getElementById('map-rail');
+            if (!rail) return;
+            rail.innerHTML = '';
+            for (let i = 1; i <= 30; i++) {
+                const node = document.createElement('div');
+                const isCurrent = i === appState.day;
+                const isPassed = i < appState.day;
+                const accentColor = appState.theme === 'space' ? '#818cf8' : (appState.theme === 'candy' ? '#fb7185' : '#fbbf24');
+                
+                node.className = `flex-shrink-0 w-16 h-16 rounded-full border-4 flex items-center justify-center text-xl font-bold cursor-pointer transition-all ${isCurrent ? 'scale-110 shadow-lg' : (isPassed ? 'text-white' : 'bg-white border-gray-100 text-gray-200')}`;
+                
+                if (isCurrent) {
+                    node.style.backgroundColor = accentColor;
+                    node.style.borderColor = 'white';
+                    node.style.color = 'white';
+                } else if (isPassed) {
+                    node.style.backgroundColor = '#4ade80';
+                    node.style.borderColor = '#22c55e';
+                }
+                
+                node.innerHTML = isPassed ? '⭐' : i;
+                node.onclick = () => { if (i <= appState.day) loadLesson(i); };
+                rail.appendChild(node);
+            }
+        }
+
+        function loadLesson(day) {
+            appState.day = day;
+            const dayValEl = document.getElementById('day-val');
+            if (dayValEl) dayValEl.innerText = day;
+            
+            const data = lessons[day] || lessons[1];
+            const lessonNameEl = document.getElementById('lesson-name');
+            if (lessonNameEl) lessonNameEl.innerText = data.title;
+            
+            const grid = document.getElementById('pinyin-grid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+            data.items.forEach(item => {
+                const card = document.createElement('div');
+                const cardBg = appState.theme === 'space' ? 'bg-indigo-900/50' : item.bg;
+                const cardText = appState.theme === 'space' ? 'text-indigo-200' : item.text;
+
+                card.className = `${cardBg} pinyin-btn p-8 rounded-[2rem] text-center border-4 border-white shadow-sm`;
+                card.onclick = () => playPinyin(item.c, item.m);
+                card.innerHTML = `<div class="text-8xl font-black ${cardText} mb-4">${item.c}</div><div class="bg-white/80 rounded-full py-2 px-4 text-sm font-bold text-gray-600 shadow-inner">${item.m}</div>`;
+                grid.appendChild(card);
+            });
+            initMap();
+        }
+
+        function playPinyin(letter, mnemonic) {
+            window.speechSynthesis.cancel();
+            const soundBase = pinyinAudioMap[letter] || '';
+            const cleanMnemonic = mnemonic.replace(/[a-zA-Z]/g, ''); 
+            
+            const utter = new SpeechSynthesisUtterance();
+            utter.lang = 'zh-CN';
+            utter.text = `${soundBase}。 ${soundBase}。 ${cleanMnemonic}`; 
+            utter.rate = 0.7; 
+            utter.pitch = appState.theme === 'candy' ? 1.4 : 1.1;
+            
+            window.speechSynthesis.speak(utter);
+            appState.energy += 1;
+            updatePetUI();
+        }
+
+        function updatePetUI() {
+            const energyValEl = document.getElementById('energy-val');
+            if (energyValEl) energyValEl.innerText = appState.energy;
+            
+            const evoFillEl = document.getElementById('evo-fill');
+            if (evoFillEl) {
+                const progress = (appState.energy % 25) * 4;
+                evoFillEl.style.width = `${progress}%`;
+            }
+            
+            const needValEl = document.getElementById('need-val');
+            if (needValEl) needValEl.innerText = Math.max(0, 25 - (appState.energy % 25));
+            
+            let nextStage = 0;
+            if (appState.energy >= 25) nextStage = 1;
+            if (appState.energy >= 60) nextStage = 2;
+            if (appState.energy >= 120) nextStage = 3;
+            
+            if (nextStage > appState.stage) {
+                appState.stage = nextStage;
+                const avatar = document.getElementById('pet-avatar');
+                if (avatar) {
+                    const config = themeConfigs[appState.theme];
+                    avatar.innerText = config.petStages[nextStage];
+                    avatar.classList.add('animate__animated', 'animate__bounceIn');
+                    setTimeout(() => avatar.classList.remove('animate__animated', 'animate__bounceIn'), 1000);
+                }
+            }
+        }
+
+        function completeDay() {
+            appState.energy += 10;
+            if (appState.day < 30) { appState.day++; loadLesson(appState.day); }
+            updatePetUI();
+            showToast("太棒了！继续加油！");
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            const ts = document.getElementById('toast-text');
+            if (t && ts) {
+                ts.innerText = msg;
+                t.style.opacity = '1';
+                setTimeout(() => t.style.opacity = '0', 2000);
+            }
+        }
+
+        // 确保 DOM 加载完成后再执行初始化逻辑
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLesson(1);
+        });
+    </script>
+</body>
+</html>
