@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>拼音大冒险 - 多主题版</title>
+    <title>拼音大冒险 - 拼读实验室版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <style>
@@ -15,7 +15,6 @@
             --card-border: #4ade80;
         }
 
-        /* 萌宠乐园主题 */
         .theme-forest {
             --primary-bg: linear-gradient(180deg, #fdfcf0 0%, #e0f2fe 100%);
             --accent-color: #22c55e;
@@ -23,7 +22,6 @@
             --header-bg: rgba(255, 255, 255, 0.6);
         }
 
-        /* 星际探险主题 */
         .theme-space {
             --primary-bg: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
             --accent-color: #818cf8;
@@ -31,7 +29,6 @@
             --header-bg: rgba(30, 27, 75, 0.8);
         }
 
-        /* 糖果世界主题 */
         .theme-candy {
             --primary-bg: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
             --accent-color: #fb7185;
@@ -91,23 +88,33 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* 针对太空主题的特殊文本适配 */
         .theme-space .text-gray-800 { color: #f8fafc; }
         .theme-space .text-gray-700 { color: #e2e8f0; }
         .theme-space .text-gray-500 { color: #94a3b8; }
-        .theme-space #lesson-box { background-color: rgba(30, 41, 59, 0.8); }
+        .theme-space #lesson-box, .theme-space #lab-box { background-color: rgba(30, 41, 59, 0.8); }
+
+        .lab-slot {
+            width: 100px;
+            height: 100px;
+            border: 4px dashed rgba(0,0,0,0.1);
+            border-radius: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
     </style>
 </head>
 <body class="theme-forest min-h-screen pb-20" id="main-body">
 
-    <!-- 顶部状态栏 -->
     <header class="p-4 flex justify-between items-center sticky top-0 z-50 dynamic-header border-b">
         <div class="flex items-center gap-2">
             <span id="header-logo" class="text-3xl">🦕</span>
             <h1 id="header-title" class="text-xl font-bold text-green-600">拼音萌宠乐园</h1>
         </div>
         <div class="flex items-center gap-2">
-            <!-- 主题切换器 -->
             <select onchange="changeTheme(this.value)" class="bg-white/50 border-none rounded-full px-2 py-1 text-xs focus:outline-none">
                 <option value="forest">森林乐园</option>
                 <option value="space">星际探险</option>
@@ -120,6 +127,49 @@
     </header>
 
     <main class="container mx-auto px-4 mt-6">
+        <!-- 拼读实验室 (新功能) -->
+        <section id="lab-box" class="bg-white rounded-[3rem] p-6 mb-8 shadow-xl border-b-8 border-yellow-400 transition-all duration-500 overflow-hidden">
+            <div class="text-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center justify-center gap-2">
+                    🧪 拼读实验室 <span class="text-sm font-normal text-gray-400">(点点看)</span>
+                </h3>
+            </div>
+            
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6 mb-8">
+                <!-- 声母选区 -->
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-xs text-gray-400">声母 (Initial)</span>
+                    <div id="slot-initial" class="lab-slot bg-blue-50 text-blue-500 border-blue-200">?</div>
+                </div>
+                
+                <span class="text-4xl text-gray-300 animate-pulse">+</span>
+                
+                <!-- 韵母选区 -->
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-xs text-gray-400">韵母 (Final)</span>
+                    <div id="slot-final" class="lab-slot bg-red-50 text-red-500 border-red-200">?</div>
+                </div>
+
+                <span class="text-4xl text-gray-300">=</span>
+
+                <!-- 结果区 -->
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-xs text-gray-400">音节 (Syllable)</span>
+                    <div id="slot-result" class="lab-slot bg-yellow-400 text-white border-white shadow-lg scale-110">?</div>
+                </div>
+            </div>
+
+            <!-- 选择列表 -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-blue-50/50 p-3 rounded-2xl">
+                    <div class="flex flex-wrap gap-2 justify-center" id="list-initials"></div>
+                </div>
+                <div class="bg-red-50/50 p-3 rounded-2xl">
+                    <div class="flex flex-wrap gap-2 justify-center" id="list-finals"></div>
+                </div>
+            </div>
+        </section>
+
         <!-- 宠物进化区 -->
         <section class="pet-card rounded-[2.5rem] p-6 mb-8 text-center relative overflow-hidden">
             <div class="relative z-10">
@@ -130,7 +180,6 @@
                 </div>
                 <p id="evo-tip" class="text-xs text-gray-400">再收集 <span id="need-val">10</span> 个能量，蛋就要裂开啦！</p>
             </div>
-            <!-- 主题背景装饰 -->
             <div id="deco-1" class="absolute -bottom-4 -left-4 text-6xl opacity-10">🌿</div>
             <div id="deco-2" class="absolute top-4 -right-4 text-6xl opacity-10 rotate-12">☀️</div>
         </section>
@@ -187,6 +236,9 @@
             }
         };
 
+        const initials = ['b', 'p', 'm', 'f', 'd', 't', 'n', 'l'];
+        const finals = ['a', 'o', 'e', 'i', 'u', 'ü'];
+
         const pinyinAudioMap = {
             'a': '啊', 'o': '喔', 'e': '鹅',
             'i': '衣', 'u': '屋', 'ü': '淤',
@@ -212,7 +264,14 @@
             ]}
         };
 
-        let appState = { day: 1, energy: 0, stage: 0, theme: 'forest' };
+        let appState = { 
+            day: 1, 
+            energy: 0, 
+            stage: 0, 
+            theme: 'forest',
+            selectedInitial: null,
+            selectedFinal: null
+        };
 
         function changeTheme(themeKey) {
             appState.theme = themeKey;
@@ -233,11 +292,69 @@
                 lessonBox.style.borderTopColor = getComputedStyle(body).getPropertyValue('--card-border');
             }
             
-            // 更新宠物外观
             document.getElementById('pet-avatar').innerText = config.petStages[appState.stage];
-            
-            showToast(`已切换到${config.title}！`);
             loadLesson(appState.day);
+        }
+
+        // 初始化实验室选择器
+        function initLab() {
+            const initContainer = document.getElementById('list-initials');
+            const finalContainer = document.getElementById('list-finals');
+            
+            initials.forEach(i => {
+                const btn = document.createElement('button');
+                btn.className = "w-10 h-10 bg-white shadow-sm rounded-xl text-blue-500 font-bold hover:bg-blue-100 transition-all pinyin-btn";
+                btn.innerText = i;
+                btn.onclick = () => selectPart('initial', i);
+                initContainer.appendChild(btn);
+            });
+
+            finals.forEach(f => {
+                const btn = document.createElement('button');
+                btn.className = "w-10 h-10 bg-white shadow-sm rounded-xl text-red-500 font-bold hover:bg-red-100 transition-all pinyin-btn";
+                btn.innerText = f;
+                btn.onclick = () => selectPart('final', f);
+                finalContainer.appendChild(btn);
+            });
+        }
+
+        function selectPart(type, val) {
+            if (type === 'initial') {
+                appState.selectedInitial = val;
+                document.getElementById('slot-initial').innerText = val;
+                document.getElementById('slot-initial').classList.add('animate__animated', 'animate__pulse');
+                setTimeout(() => document.getElementById('slot-initial').classList.remove('animate__animated', 'animate__pulse'), 500);
+            } else {
+                appState.selectedFinal = val;
+                document.getElementById('slot-final').innerText = val;
+                document.getElementById('slot-final').classList.add('animate__animated', 'animate__pulse');
+                setTimeout(() => document.getElementById('slot-final').classList.remove('animate__animated', 'animate__pulse'), 500);
+            }
+
+            if (appState.selectedInitial && appState.selectedFinal) {
+                const result = appState.selectedInitial + appState.selectedFinal;
+                const resultSlot = document.getElementById('slot-result');
+                resultSlot.innerText = result;
+                resultSlot.classList.add('animate__animated', 'animate__tada');
+                
+                // 拼读发音逻辑
+                playSynthesis(`${pinyinAudioMap[appState.selectedInitial]} --- ${pinyinAudioMap[appState.selectedFinal]} --- ${result}`);
+                
+                appState.energy += 2;
+                updatePetUI();
+                
+                setTimeout(() => resultSlot.classList.remove('animate__animated', 'animate__tada'), 1000);
+            }
+        }
+
+        function playSynthesis(text) {
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance();
+            utter.lang = 'zh-CN';
+            utter.text = text;
+            utter.rate = 0.7;
+            utter.pitch = appState.theme === 'candy' ? 1.4 : 1.1;
+            window.speechSynthesis.speak(utter);
         }
 
         function initMap() {
@@ -269,9 +386,6 @@
 
         function loadLesson(day) {
             appState.day = day;
-            const dayValEl = document.getElementById('day-val');
-            if (dayValEl) dayValEl.innerText = day;
-            
             const data = lessons[day] || lessons[1];
             const lessonNameEl = document.getElementById('lesson-name');
             if (lessonNameEl) lessonNameEl.innerText = data.title;
@@ -286,27 +400,15 @@
                 const cardText = appState.theme === 'space' ? 'text-indigo-200' : item.text;
 
                 card.className = `${cardBg} pinyin-btn p-8 rounded-[2rem] text-center border-4 border-white shadow-sm`;
-                card.onclick = () => playPinyin(item.c, item.m);
+                card.onclick = () => {
+                    playSynthesis(`${pinyinAudioMap[item.c]}。 ${pinyinAudioMap[item.c]}。 ${item.m.replace(/[a-zA-Z]/g, '')}`);
+                    appState.energy += 1;
+                    updatePetUI();
+                };
                 card.innerHTML = `<div class="text-8xl font-black ${cardText} mb-4">${item.c}</div><div class="bg-white/80 rounded-full py-2 px-4 text-sm font-bold text-gray-600 shadow-inner">${item.m}</div>`;
                 grid.appendChild(card);
             });
             initMap();
-        }
-
-        function playPinyin(letter, mnemonic) {
-            window.speechSynthesis.cancel();
-            const soundBase = pinyinAudioMap[letter] || '';
-            const cleanMnemonic = mnemonic.replace(/[a-zA-Z]/g, ''); 
-            
-            const utter = new SpeechSynthesisUtterance();
-            utter.lang = 'zh-CN';
-            utter.text = `${soundBase}。 ${soundBase}。 ${cleanMnemonic}`; 
-            utter.rate = 0.7; 
-            utter.pitch = appState.theme === 'candy' ? 1.4 : 1.1;
-            
-            window.speechSynthesis.speak(utter);
-            appState.energy += 1;
-            updatePetUI();
         }
 
         function updatePetUI() {
@@ -341,9 +443,9 @@
 
         function completeDay() {
             appState.energy += 10;
-            if (appState.day < 30) { appState.day++; loadLesson(appState.day); }
+            if (appState.day < 3) { appState.day++; loadLesson(appState.day); }
             updatePetUI();
-            showToast("太棒了！继续加油！");
+            showToast("太棒了！拼读小达人！");
         }
 
         function showToast(msg) {
@@ -356,8 +458,8 @@
             }
         }
 
-        // 确保 DOM 加载完成后再执行初始化逻辑
         document.addEventListener('DOMContentLoaded', () => {
+            initLab();
             loadLesson(1);
         });
     </script>
